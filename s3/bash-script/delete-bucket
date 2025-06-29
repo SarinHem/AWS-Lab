@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Usage: ./delete-s3-bucket.sh <bucket-name> [--force]
+
+BUCKET_NAME="$1"
+FORCE_DELETE="$2"
+
+if [ -z "$BUCKET_NAME" ]; then
+  echo "Usage: $0 <bucket-name> [--force]"
+  echo "  --force : (optional) empties the bucket before deleting"
+  exit 1
+fi
+
+if [ "$FORCE_DELETE" == "--force" ]; then
+  echo "⚠️ Emptying bucket '$BUCKET_NAME' before deletion..."
+  aws s3 rm "s3://$BUCKET_NAME" --recursive
+fi
+
+echo "🗑️ Deleting bucket: $BUCKET_NAME..."
+aws s3api delete-bucket --bucket "$BUCKET_NAME" --region ap-southeast-1
+
+if [ $? -eq 0 ]; then
+  echo "✅ Bucket '$BUCKET_NAME' deleted."
+else
+  echo "❌ Failed to delete bucket '$BUCKET_NAME'."
+fi

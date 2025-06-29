@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Variables
+BUCKET_NAME="$1"
+REGION="ap-southeast-1"  # Change as needed
+
+# Check if bucket name is provided
+if [ -z "$BUCKET_NAME" ]; then
+  echo "Usage: $0 <bucket-name>"
+  exit 1
+fi
+
+# Create S3 bucket
+echo "Creating bucket: $BUCKET_NAME in region: $REGION"
+
+aws s3api create-bucket \
+  --bucket "$BUCKET_NAME" \
+  --region "$REGION" \
+  --create-bucket-configuration LocationConstraint="$REGION"
+
+# Check if creation was successful
+if [ $? -eq 0 ]; then
+  echo "Bucket '$BUCKET_NAME' created successfully."
+else
+  echo "Failed to create bucket '$BUCKET_NAME'."
+fi

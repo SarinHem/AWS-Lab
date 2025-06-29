@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Usage: ./put-s3-object.sh <bucket-name> <file-path> [s3-key]
+
+BUCKET_NAME="$1"
+FILE_PATH="$2"
+S3_KEY="$3"  # Optional: key name in bucket
+
+# Validate inputs
+if [ -z "$BUCKET_NAME" ] || [ -z "$FILE_PATH" ]; then
+  echo "Usage: $0 <bucket-name> <file-path> [s3-key]"
+  exit 1
+fi
+
+# Use file name as key if not specified
+if [ -z "$S3_KEY" ]; then
+  S3_KEY=$(basename "$FILE_PATH")
+fi
+
+echo "📤 Uploading '$FILE_PATH' to 's3://$BUCKET_NAME/$S3_KEY'..."
+
+aws s3api put-object \
+  --bucket "$BUCKET_NAME" \
+  --key "$S3_KEY" \
+  --body "$FILE_PATH" \
+  --region ap-southeast-1
+
+# Check success
+if [ $? -eq 0 ]; then
+  echo "✅ File uploaded successfully."
+else
+  echo "❌ Upload failed."
+fi

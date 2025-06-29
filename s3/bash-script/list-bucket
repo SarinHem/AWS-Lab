@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "📦 Listing all S3 buckets..."
+
+aws s3api list-buckets --query "Buckets[].Name" --output table
+
+# Check for error
+if [ $? -eq 0 ]; then
+  echo "✅ Bucket list retrieved successfully."
+else
+  echo "❌ Failed to list buckets. Make sure AWS CLI is configured."
+fi
