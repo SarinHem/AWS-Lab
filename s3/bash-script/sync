@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Usage: ./sync-to-s3-with-delete.sh <local-dir> <bucket-name> [s3-prefix]
+
+# Input parameters
+LOCAL_DIR="$1"
+BUCKET_NAME="$2"
+S3_PREFIX="$3"
+REGION="ap-southeast-1" 
+
+# Check if required arguments are provided
+if [ -z "$LOCAL_DIR" ] || [ -z "$BUCKET_NAME" ]; then
+  echo "Usage: $0 <local-dir> <bucket-name> [s3-prefix]"
+  echo "Example: $0 ./my-folder my-bucket-name backup/"
+  exit 1
+fi
+
+# Remove trailing slash from LOCAL_DIR if present
+LOCAL_DIR="${LOCAL_DIR%/}"
+
+# Build destination S3 path
+if [ -z "$S3_PREFIX" ]; then
+  S3_PATH="s3://$BUCKET_NAME/"
+else
+  S3_PATH="s3://$BUCKET_NAME/$S3_PREFIX"
+fi
+
+echo "🔄 Starting sync..."
+echo "📁 Local directory: $LOCAL_DIR"
+echo "☁️  S3 destination: $S3_PATH"
+echo "⚠️  Files in S3 that don't exist locally WILL BE DELETED!"
+
+# Run sync with --delete to mirror the local directory
+aws s3 sync "$LOCAL_DIR" "$S3_PATH" --delete --region "$REGION"
+
+# Check result
+if [ $? -eq 0 ]; then
+  echo "✅ Sync completed successfully."
+else
+  echo "❌ Sync failed. Check AWS credentials and permissions."
+fi
