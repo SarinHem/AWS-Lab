@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Usage: ./delete-object.sh <bucket-name> <s3-key>
+
+BUCKET_NAME="$1"
+OBJECT_KEY="$2"
+REGION="ap-southeast-1"
+
+if [ -z "$BUCKET_NAME" ] || [ -z "$OBJECT_KEY" ]; then
+  echo "Usage: $0 <bucket-name> <s3-key>"
+  exit 1
+fi
+
+# Check if the object exists
+echo "🔍 Checking if object exists..."
+aws s3api head-object --bucket "$BUCKET_NAME" --key "$OBJECT_KEY" --region "$REGION" > /dev/null 2>&1
+
+if [ $? -ne 0 ]; then
+  echo "⚠️ Object 's3://$BUCKET_NAME/$OBJECT_KEY' does not exist. Skipping delete."
+  exit 0
+fi
+
+# Delete the object
+echo "🗑️ Deleting object 's3://$BUCKET_NAME/$OBJECT_KEY'..."
+aws s3api delete-object --bucket "$BUCKET_NAME" --key "$OBJECT_KEY" --region "$REGION"
+
+if [ $? -eq 0 ]; then
+  echo "✅ Object deleted successfully."
+else
+  echo "❌ Failed to delete object."
+fi
